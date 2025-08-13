@@ -15,8 +15,13 @@ _G.self = component.proxy(component.list('drone')())
 ---@type debug
 _G.dbg = component.proxy(component.list('debug')())
 ---@param str string
-function _G.say(str) dbg.runCommand('/say ' .. str) end
----@type modem
+function _G.say(str)
+  if _G ~= nil then
+    _G.dbg.runCommand('/say ' .. str)
+  else
+    if component.isAvailable('debug') then _G.dbg = component.proxy(component.list('debug')()) end
+  end
+end ---@type modem
 _G.modem = component.proxy(component.list('modem')())
 
 say('init')
