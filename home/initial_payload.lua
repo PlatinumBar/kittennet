@@ -14,12 +14,7 @@ _G.computer = _G.computer -- useless shit to make the lsp understand what a comp
 _G.component = _G.component
 --#endregion remove
 say('init')
-if component.isAvailable('drone') then
   _G.self = component.proxy(component.list('drone')())
-else
-  _G.self = component.proxy(component.list('robot')())
-end
-say('pt')
 ---@type debug
 _G.dbg = component.proxy(component.list('debug')())
 ---@type modem
