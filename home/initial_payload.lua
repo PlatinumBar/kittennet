@@ -2,8 +2,6 @@ local CMD_PORT = 1234
 local RESP_PORT = 1235
 local newline = string.char(10)
 local tabline = string.char(13)
----@param str string
-function say(str) dbg.runCommand('/say ' .. str) end
 
 --#region remove
 ---@class computer
@@ -13,12 +11,16 @@ _G.computer = _G.computer -- useless shit to make the lsp understand what a comp
 ---@class component
 _G.component = _G.component
 --#endregion remove
-say('init')
-  _G.self = component.proxy(component.list('drone')())
+_G.self = component.proxy(component.list('drone')())
 ---@type debug
 _G.dbg = component.proxy(component.list('debug')())
+---@param str string
+function _G.say(str) dbg.runCommand('/say ' .. str) end
 ---@type modem
 _G.modem = component.proxy(component.list('modem')())
+
+say('init')
+
 modem.open(CMD_PORT)
 modem.open(RESP_PORT)
 ---@type table<string,function>
