@@ -2,6 +2,9 @@ local CMD_PORT = 1234
 local RESP_PORT = 1235
 local newline = string.char(10)
 local tabline = string.char(13)
+---@param str string
+function say(str) dbg.runCommand('/say ' .. str) end
+
 --#region remove
 ---@class computer
 ---@type computer
@@ -10,20 +13,19 @@ _G.computer = _G.computer -- useless shit to make the lsp understand what a comp
 ---@class component
 _G.component = _G.component
 --#endregion remove
+say('init')
 if component.isAvailable('drone') then
   _G.self = component.proxy(component.list('drone')())
 else
   _G.self = component.proxy(component.list('robot')())
 end
+say('pt')
 ---@type debug
 _G.dbg = component.proxy(component.list('debug')())
 ---@type modem
 _G.modem = component.proxy(component.list('modem')())
 modem.open(CMD_PORT)
 modem.open(RESP_PORT)
----@param str string
-function say(str) dbg.runCommand('/say ' .. str) end
-
 ---@type table<string,function>
 ---@diagnostic disable-next-line
 callbacks = {}
