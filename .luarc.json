@@ -1,0 +1,17 @@
+{
+  "workspace.library": [
+    "./_ocstub"
+  ],
+  "workspace.ignoreDir": [
+    ".git",
+    ".build"
+  ],
+  "diagnostics.globals": [
+    "component",
+    "computer"
+  ],
+  "runtime.version": "Lua 5.3",
+  "diagnostics.disable": [
+    "lowercase-global"
+  ]
+}

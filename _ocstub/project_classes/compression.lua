@@ -1,4 +1,5 @@
 ---@meta
+---@abstract
 ---@class compressor
 local compressor = {}
 ---@param bytearray string
