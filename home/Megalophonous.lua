@@ -40,10 +40,10 @@ function m:req_start(data, allow_silent, addr, timeout)
   else
     self.modem.broadcast(m.req_port, m.types[4], string.pack('BLz', allow_silent and 1 or 0, seed, data))
   end
-  table.insert(self.queue, seed, {
+  self.queue[seed] = {
     (timeout or 1) + computer.uptime(),--[[timeout in seconds + computer.uptime ~~ removal timestamp]]
     self_proc,
-  })
+  }
 
   return coroutine.yield()
 end
@@ -58,6 +58,11 @@ function m:remove_timed_out(time)
     end
   end
 end
-m.network = { __index = function(_, name) return m:req_start(name, true) end }
+
+function CRIR_response()
+  
+end
+
+m.net = { __index = function(_, name) return m:req_start(name, true) end }
 
 return m

@@ -1,0 +1,15 @@
+from: htxps://ocdoc.cil.li/component:modem
+
+the standard modem message signature is (modem_message) localAddress: string, remoteAddress: string, port: number, distance: number, .... 
+a single message can be up to 8kib long, each element has 2 bytes of overhead, nil/number/boolean takes up 4b because lua is stupid, so string byte arrays are the superior mode of data transfer here.
+the kittennet protocol messages rely on the last 2 variables being the packet type (string) and a message (string/byte array string)
+any additional information will be discarded
+
+so something that a signal pull might receive looks like [  modem_message, (receiver network card address) (remote network card address) 1234:port 4.65:distance c_exec:packet_type " say('some code here, default function') "  ]
+
+the network callback parser receives the remote address, port, distance and the stringinfo in the last packet
+provided by this code:    local ok, err = pcall(net_callbacks[packet_type], remote_addr, port, distance, stringinfo)
+network callbacks should not return anything
+
+use string.pack (format information at https://www.lua.org/manual/5.3/manual.html#6.4.2) for transfering anything thats not just text in the strininfo part of the packet
+
