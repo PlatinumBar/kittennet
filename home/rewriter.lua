@@ -1,5 +1,5 @@
-local path = ...
-assert(path, 'name.lua <file> you dumbass')
+local path = table.pack(...)
+assert(path.n > 1, 'name.lua <file> <flag> you dumbass\n -w to write to eeprom\n -r to run')
 local function save(fpath, str)
   local fs = require('filesystem')
   local f, err = fs.open(fpath, 'w')
@@ -8,7 +8,7 @@ local function save(fpath, str)
   f:close()
 end -- usage
 
-local f = assert(io.open(path, 'rb'))
+local f = assert(io.open(path[1], 'rb'))
 local s = f:read('*a')
 f:close()
 local modem = assert(require('component').modem)
@@ -40,7 +40,11 @@ while s:find(' }') do
 end
 
 if string.len(s) > 4096 then error('too much space used, currently at ' .. string.len(s) .. 'b') end
-modem.broadcast(1234, 'fmwr', s)
+if path[2] == '-w' then
+  modem.broadcast(1234, 'fmwr', s)
+else
+  modem.broadcast(1234, 'c_exec', s)
+end
 
 print('just wrote ' .. string.len(s) .. ' bytes')
 
