@@ -10,6 +10,8 @@ so something that a signal pull might receive looks like [  modem_message, (rece
 the network callback parser receives the remote address, port, distance and the stringinfo in the last packet
 provided by this code:    local ok, err = pcall(net_callbacks[packet_type], remote_addr, port, distance, stringinfo)
 network callbacks should not return anything
+so a template for network packets would be 
+net_callbacks.name = function(remote_addr, port, distance, stringinfo) end
 
 use string.pack (format information at https://www.lua.org/manual/5.3/manual.html#6.4.2) for transfering anything thats not just text in the strininfo part of the packet
 

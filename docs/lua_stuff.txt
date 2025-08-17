@@ -1,0 +1,16 @@
+you can convert a boolean to a byte by doing bool and 1 or 0 because lua is a little stupid
+string.pack is the best thing ever, go read https://www.lua.org/manual/5.3/manual.html#6.4.2
+basically allows you to write and string.unpack to read byte arrays with anything thats not a table
+this means that you can write whatever you want into a packed string, compress it with gzip and unpack it on a different device
+you can also write the entire kittennet network packet into a packed string, compress it and make a packet to decompress it and parse it as a separate packet
+
+since you cant use lua bytecode in oc due to security reasons, every sharable function has to be a string
+to run it you need to use load and pcall/xpcall
+func, error = load(source code) returns the function in the first variable and the error in the second variable
+ok, returns = pcall(func) <- returns a boolean in the first variable which is true when the code ran and false when it failed, the "returns" variable here is a string with the error when "ok" is false, but pcall also return every param after ok that the function provided
+higly recommend to play around with it in the lua interpriter  
+
+xpcall allows you to pass in a custom error parser. 
+when running the function fails, the function you've provided will be called with whatever the error is from regular pcall. the error function MUST return something, or it will absolutely shit itself
+whatever the error handling function returns get put into the second param that xpcall returns 
+

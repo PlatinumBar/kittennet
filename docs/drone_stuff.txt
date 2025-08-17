@@ -1,0 +1,2 @@
+drone movement is capped on each axis separately, so horizontal movement is 2√2, and horizontal + vertical is 2√3
+
