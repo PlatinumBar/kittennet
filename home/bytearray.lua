@@ -200,7 +200,6 @@ decoder[0x15] = function(str, offset)
   return result, offset
 end
 decoder[0x16] = function(str, offset)
-
   local result, size, offset = {}, 0, offset
   size, offset = decode(str, offset)
   if size >= 1 then

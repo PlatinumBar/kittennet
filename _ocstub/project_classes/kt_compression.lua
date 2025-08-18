@@ -1,6 +1,8 @@
----@meta
+---@meta "kt_compressor"
 ---@abstract
----@class compressor
+---@class kt_compressor
+---@field zip fun(input:string):string|nil
+---@field deflate fun(input:string):string|nil
 local compressor = {}
 ---@param bytearray string
 ---@return boolean,string|nil
