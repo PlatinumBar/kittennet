@@ -1,3 +1,4 @@
 drone movement is capped on each axis separately, so horizontal movement is 2√2, and horizontal + vertical is 2√3
 
 the geolizer can be used as a radar for pathfinding
+uuids are hexadecimals, containing a total of 16 bytes of actual data instead of the like 36 that the string takes
