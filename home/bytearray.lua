@@ -33,6 +33,7 @@ add 4 to get unsigned
 since this is < 0x20 opcodes, it fits into 5 bits, which means that if you spend enough time you can probably do that
 
 --]]
+---@diagnostic disable:redefined-local
 ---@diagnostic disable-next-line:missing-fields
 local m = {}
 local OPCODE_COUNT = 0x16 + 1 -- the amount of types in the comments above + 1
@@ -43,6 +44,8 @@ local up = string.unpack
 ----# turn a type(input) into a function that takes in num and outputs a string
 local encoder = {}
 local decoder = {}
+
+--TODO: remove this, this was for debugging
 function string.tohex(str)
   return (str:gsub('.', function(c) return string.format('%02X', string.byte(c)) end))
 end
@@ -51,9 +54,11 @@ end
 encoder.number = function(num) return encoder[math.type(num)](num) end
 encoder['nil'] = '\x13'
 ---@param num integer
----@param signed boolean|nil
-encoder.integer = function(num, signed)
-  local o = signed and 4 or 0 -- add 4 to the opcode to turn a signed into an unsigned
+----@param negative boolean|nil
+encoder.integer = function(num)
+  local negative = num < 0
+  if negative then num = -num end
+  local o = negative and 4 or 0 -- add 4 to the opcode to turn a signed into an unsigned
   if num > OPCODE_COUNT and num < 256 then
     return sp('B', num)
   elseif num < 256 ^ 1 then
@@ -79,7 +84,7 @@ encoder.string = function(str)
     return true
   end
   if is_ascii(str) then return sp('Bz', 0x14, str) end
-  if #str > 256 then
+  if #str < 256 then
     return sp('BB', 0x11, #str) .. str
   else
     return sp('BL', 0x12, #str) .. str
@@ -135,13 +140,99 @@ function safe_encode(value)
   end
 end
 
+local function decode(str, offset)
+  local b, o = up('B', str, offset)
+  if decoder[b] ~= nil then
+    local v, o = decoder[b](str, o)
+    return v, o
+  else
+    return b, o --assume that its a byte with nothing else to it if its not in the decoder table
+  end
+end
+
+decoder[0x0] = function(str, offset) return false, offset end
+decoder[0x1] = function(str, offset) return true, offset end
+decoder[0x2] = function(str, offset) return up('B', str, offset) end
+decoder[0x3] = function(str, offset) return up('H', str, offset) end
+decoder[0x4] = function(str, offset) return up('L', str, offset) end
+decoder[0x5] = function(str, offset) return up('J', str, offset) end
+
+decoder[0x6] = function(str, offset) return up('b', str, offset) end
+decoder[0x7] = function(str, offset) return up('h', str, offset) end
+decoder[0x8] = function(str, offset) return up('l', str, offset) end
+decoder[0x9] = function(str, offset) return up('j', str, offset) end
+decoder[0xa] = function(str, offset) return up('T', str, offset) end
+decoder[0xb] = function(str, offset)
+  local bt = up('B', str, offset)
+  return up('i' .. tostring(bt), str, offset + 1)
+end
+decoder[0xc] = function(str, offset)
+  local bt = up('B', str, offset)
+  return up('I' .. tostring(bt), str, offset + 1)
+end
+decoder[0xd] = function(str, offset) return up('f', str, offset) end
+decoder[0xf] = function(str, offset) return up('d', str, offset) end
+decoder[0x10] = function(str, offset) return up('n', str, offset) end
+decoder[0x11] = function(str, offset)
+  local N, nof = up('B', str, offset)
+  return up('c' .. tostring(N), str, nof)
+end
+decoder[0x12] = function(str, offset)
+  local N, nof = up('L', str, offset)
+  return up('c' .. tostring(N), str, nof)
+end
+decoder[0x13] = function(str, offset) return nil, offset end
+decoder[0x14] = function(str, offset) return up('z', str, offset) end
+decoder[0x15] = function(str, offset)
+  local result, size, offset = {}, 0, offset -- end table, table element count, offset
+  size, offset = decode(str, offset)
+  if size >= 1 then
+    for _ = 1, size do
+      local key, n1 = decode(str, offset)
+      offset = n1
+      local value, n2 = decode(str, offset)
+      offset = n2
+      result[key] = value
+    end
+  else
+    return result, offset
+  end
+  return result, offset
+end
+decoder[0x16] = function(str, offset)
+
+  local result, size, offset = {}, 0, offset
+  size, offset = decode(str, offset)
+  if size >= 1 then
+    for i = 1, size do
+      local value, newo = decode(str, offset)
+      result[i] = value
+      offset = newo
+    end
+    return result, offset
+  else
+    return result, offset
+  end
+end
+
 ---@param tbl table
 ---@return boolean
----@diagnostic disable-next-line:unused-function,unused-local
----
-m.serialize = function(tbl)
-  return encoder[type(tbl)](tbl)
+m.serialize = function(tbl) return encoder[type(tbl)](tbl) end
+
+m.deserialize = function(value)
+  local result, offset = {}, 1
+  while offset < #value do
+    local code, o = up('B', value, offset)
+    offset = o
+    if decoder[code] == nil then
+      table.insert(result, code) -- assume that its a byte
+    end
+    local value, newoffset = decoder[code](value, offset)
+    offset = newoffset
+    table.insert(result, value)
+  end
+  ---@diagnostic disable-next-line # shut up computer
+  return table.unpack(result)
 end
-m.deserialize = function(value) return {} end
 
 return m
