@@ -152,16 +152,19 @@ end
 
 decoder[0x0] = function(str, offset) return false, offset end
 decoder[0x1] = function(str, offset) return true, offset end
-decoder[0x2] = function(str, offset) return up('B', str, offset) end
-decoder[0x3] = function(str, offset) return up('H', str, offset) end
-decoder[0x4] = function(str, offset) return up('L', str, offset) end
-decoder[0x5] = function(str, offset) return up('J', str, offset) end
-
-decoder[0x6] = function(str, offset) return up('b', str, offset) end
-decoder[0x7] = function(str, offset) return up('h', str, offset) end
-decoder[0x8] = function(str, offset) return up('l', str, offset) end
-decoder[0x9] = function(str, offset) return up('j', str, offset) end
-decoder[0xa] = function(str, offset) return up('T', str, offset) end
+-- decoder[0x2] = function(str, offset) return up('B', str, offset) end
+-- decoder[0x3] = function(str, offset) return up('H', str, offset) end
+-- decoder[0x4] = function(str, offset) return up('L', str, offset) end
+-- decoder[0x5] = function(str, offset) return up('J', str, offset) end
+--
+-- decoder[0x6] = function(str, offset) return up('b', str, offset) end
+-- decoder[0x7] = function(str, offset) return up('h', str, offset) end
+-- decoder[0x8] = function(str, offset) return up('l', str, offset) end
+-- decoder[0x9] = function(str, offset) return up('j', str, offset) end
+-- decoder[0xa] = function(str, offset) return up('T', str, offset) end
+for i, v in ipairs({ 'B', 'H', 'L', 'J', 'b', 'h', 'l', 'j', 'T' }) do
+  decoder[i + 1] = load("return function(str,offset) up('" .. v .. "',str,offset) end")()
+end
 decoder[0xb] = function(str, offset)
   local bt = up('B', str, offset)
   return up('i' .. tostring(bt), str, offset + 1)

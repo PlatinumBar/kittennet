@@ -3,8 +3,8 @@ local m = {}
 --#region remove
 ---@type modem
 ---@class modem
-m.modem = _G.modem
 --#endregion remove
+m.modem = _G.modem -- will fail if its defined under a different name...
 m.req_port = _G.REQ_PORT or 1236
 m.resp_port = _G.RESP_PORT or 1235
 
@@ -68,19 +68,19 @@ function m:CRIR_response(remote_addr, port, distance, stringinfo)
   ---@type number,number,string
   local allow_silent_b, seed, data = string.unpack('BLz', stringinfo)
 
-  local function send_no_info()
+  local function ni()
     if allow_silent_b == 0 then self.modem.send(remote_addr, self.resp_port, string.pack('B', m.types.CRIS_STAT.NI)) end
   end
 
   local f, err = load('return ' .. data)
   if not f then
-    send_no_info()
+    ni()
     return
   end
   ---@cast f function
   local finished, result = pcall(f)
   if not finished then
-    send_no_info()
+    ni()
     return
   end
 end
@@ -89,4 +89,10 @@ m.net = { __index = function(_, name) return m:req_start(name, true) end }
 
 m.modem.open(m.req_port)
 m.modem.open(m.resp_port)
-return m
+
+-- dont return anything for drones as it assumes that it doesnt have a disk strapped to it, so there is no require()
+if _G.self.type == 'drone' then
+  _G.modules['mg'] = m
+else
+  return m
+end

@@ -28,6 +28,8 @@ _G.component = _G.component
 --#endregion remove
 ---@class drone
 _G.self = cmp_lookup('drone') or cmp_lookup('robot')
+self.rname = self.name()
+self.setStatusText(self.rname)
 
 ---@type debug
 ---@diagnostic disable-next-line:assign-type-mismatch
@@ -54,6 +56,15 @@ signal_callbacks = {}
 ---@type table<string,function>
 ---@diagnostic disable-next-line:lowercase-global
 net_callbacks = {}
+
+---@type table<string,table>
+---@diagnostic disable-next-line:lowercase-global
+---stuff to store code chunks
+modules = {}
+
+---@type table<string,table>
+---@diagnostic disable-next-line:lowercase-global
+cortex = {} --stuff to store network information i guess
 
 ---assumes that stringinfo is just code, no packing, no compression
 net_callbacks.c_exec = function(_, _, _, stringinfo)

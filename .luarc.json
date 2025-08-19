@@ -1,6 +1,8 @@
 {
   "workspace.library": [
-    "./_ocstub"
+    "./_ocstub",
+    "./_ocstub/oc_missing/",
+    "./_ocstub/gtnh_stubs/"
   ],
   "workspace.ignoreDir": [
     ".git",
