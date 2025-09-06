@@ -98,14 +98,11 @@ mainfunc = function()
   local info = table.pack(computer.pullSignal(pullInterval)) -- this is a bad idea but i think it saves energy
   if info[1] and info ~= nil then
     if signal_callbacks[info[1]] ~= nil then
-      local c = coroutine.create(function()
-        local ok, err = pcall(signal_callbacks[info[1]], info)
-        if not ok then
-          say('error: ' .. tostring(err))
-          computer.pushSignal('exception', 'main loop')
-        end
-      end)
-      coroutine.resume(c)
+      local ok, err = pcall(signal_callbacks[info[1]], info)
+      if not ok then
+        say('error: ' .. tostring(err))
+        computer.pushSignal('exception', 'main loop')
+      end
     end
   else
     ---@diagnostic disable-next-line:undefined-field
