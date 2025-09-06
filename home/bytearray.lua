@@ -236,5 +236,10 @@ m.deserialize = function(value)
   ---@diagnostic disable-next-line # shut up computer
   return table.unpack(result)
 end
-
+if _G.self.type == 'drone' then
+  if _G.say ~= nil then _G.say('loaded the ./bytearray.lua module (_G.modules.al)') end
+  _G.modules['al'] = m
+else
+  return m
+end
 return m

@@ -92,6 +92,7 @@ m.modem.open(m.resp_port)
 
 -- dont return anything for drones as it assumes that it doesnt have a disk strapped to it, so there is no require()
 if _G.self.type == 'drone' then
+  if _G.say ~= nil then _G.say('loaded the ./Megalophonous.lua module (_G.modules.mg)') end
   _G.modules['mg'] = m
 else
   return m
