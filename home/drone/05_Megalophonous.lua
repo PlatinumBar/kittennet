@@ -26,7 +26,7 @@ m.types = {
 }
 ---list of { random number seed: { removal timestamp, coroutine } }
 m.queue = {}
-
+m.serial = _G.require('04_bytearray')
 ---@param data string
 ---@param allow_silent boolean
 ---@param addr string|nil

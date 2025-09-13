@@ -1,14 +1,14 @@
 local CMD_PORT = 1234
 
 --- these have to exist because the bloat stripper will shit itself if you use the character
----@diagnostic disable-next-line:unused-local
-local newline = string.char(10)
----@diagnostic disable-next-line:unused-local
-local tabline = string.char(13)
+-- ---@diagnostic disable-next-line:unused-local
+-- local newline = string.char(10)
+-- ---@diagnostic disable-next-line:unused-local
+-- local tabline = string.char(13)
 
-designation = 'bee' -- eg romanian, bee, local leader
+designation = 'bee' -- eg romanian, bee
 
-function cmp_lookup(name)
+local function cmp_lookup(name)
   if component.list(name) ~= {} then
     return component.proxy(component.list(name)())
   else
@@ -41,8 +41,6 @@ _G.modem = cmp_lookup('modem')
 function _G.say(str)
   if _G.dbg ~= nil then _G.dbg.runCommand('/say ' .. str) end
 end
-
-say('init')
 
 modem.open(CMD_PORT)
 ---@type table<string,function>
@@ -109,6 +107,8 @@ mainfunc = function()
     if type(_G.no_info_cb) == 'function' then pcall(_G.no_info_cb) end
   end
 end
+clock = computer.uptime()
+say('init')
 while true do
   mainfunc()
 end

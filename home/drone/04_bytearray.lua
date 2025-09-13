@@ -41,6 +41,9 @@ local OPCODE_COUNT = 0x16 + 1 -- the amount of types in the comments above + 1
 --save on a few end result characters by getting the shortened function name
 local sp = string.pack
 local up = string.unpack
+--this is a funny one, because redefining something as local saves on a bytecode op each time its called
+local tostring = tostring
+
 ----# turn a type(input) into a function that takes in num and outputs a string
 local encoder = {}
 local decoder = {}
@@ -61,6 +64,7 @@ encoder.integer = function(num)
   local o = negative and 4 or 0 -- add 4 to the opcode to turn a signed into an unsigned
   if num > OPCODE_COUNT and num < 256 then
     return sp('B', num)
+    -- 256^1 256^2 etc expressions where 2 constants are operated on get jitted out -> its fine to use them
   elseif num < 256 ^ 1 then
     return sp('BB', 0x02 + o, num)
   elseif num < 256 ^ 2 then
@@ -74,7 +78,7 @@ end
 encoder.float = function(num) return sp('Bd', 0xf, num) end
 ---@param str string
 encoder.string = function(str)
-  --removing this cuts down on quite a few cycles but increases memory usage
+  --removing this cuts down on quite a few cycles but increases memory usage i guess
   local function is_ascii(str2)
     for i = 1, #str2 do
       local byte = string.byte(str2, i)
@@ -238,7 +242,7 @@ m.deserialize = function(value)
 end
 if _G.self.type == 'drone' then
   if _G.say ~= nil then _G.say('loaded the ./bytearray.lua module (_G.modules.al)') end
-  _G.modules['al'] = m
+  _G.modules['04_bytearray.lua'] = m
 else
   return m
 end
