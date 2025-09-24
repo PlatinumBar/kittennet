@@ -1,13 +1,14 @@
 ---@meta _
 ---@class task
----@field f thread
----@field p number
----@field t string #type
----@field s boolean
+---@field func thread
+---@field prio number
+---@field type string
+---@field default number
+---@type task
 task = {
   ---@type function
-  f = function() end,
-  p = 0,
-  t = '',
-  s = false,
+  func = function() end,
+  prio = 0,
+  type = '',
+  default = 5,
 }

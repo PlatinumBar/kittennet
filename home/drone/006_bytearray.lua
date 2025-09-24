@@ -33,12 +33,15 @@ add 4 to get unsigned
 since this is < 0x20 opcodes, it fits into 5 bits, which means that if you spend enough time you can probably do that
 
 --]]
+--
+
 ---@diagnostic disable:redefined-local
 ---@diagnostic disable-next-line:missing-fields
 local m = {}
 local OPCODE_COUNT = 0x16 + 1 -- the amount of types in the comments above + 1
 --this is required for when a byte is above OPCODE_COUNT and bellow 255 meaning that you can cheese yourself some space there
 --save on a few end result characters by getting the shortened function name
+
 local sp = string.pack
 local up = string.unpack
 --this is a funny one, because redefining something as local saves on a bytecode op each time its called
@@ -126,7 +129,7 @@ encoder.table = function(tbl)
     local s = sp('B', 0x15)
     s = s .. safe_encode(count_table(tbl))
     for k, v in pairs(tbl) do
-      if type(k) ~= 'number' and type(k) ~= 'string' then error('tried to encode an invalid table') end
+      if type(k) ~= 'number' and type(k) ~= 'string' then error(1040129) end
       s = s .. safe_encode(k)
       s = s .. safe_encode(v)
     end
@@ -240,10 +243,10 @@ m.deserialize = function(value)
   ---@diagnostic disable-next-line # shut up computer
   return table.unpack(result)
 end
-if _G.self.type == 'drone' then
-  if _G.say ~= nil then _G.say('loaded the ./bytearray.lua module (_G.modules.al)') end
-  _G.modules['04_bytearray.lua'] = m
-else
-  return m
-end
+-- if _G.self.type == 'drone' then
+--   if _G.say ~= nil then _G.say('loaded the ./bytearray.lua module (_G.modules.al)') end
+--   _G.modules['04_bytearray.lua'] = m
+-- else
+--   return m
+-- end
 return m

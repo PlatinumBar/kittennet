@@ -21,6 +21,12 @@ function filesystem.canonical(path) end
 ---@return table # A table of path segments.
 function filesystem.segments(path) end
 
+
+---realPath
+---@param file string
+---@return string
+function filesystem.realPath(file) end
+
 ---Concatenates multiple paths into one.
 ---@param pathA string # The first path.
 ---@param pathB string # The second path.

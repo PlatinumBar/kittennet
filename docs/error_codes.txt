@@ -1,0 +1,6 @@
+if you want to poop pant, please encode the error code in a number like this
+  1020950
+  first number (1) for padding, or could be used to signify unit type
+  02 - module index (02_tasks.lua)
+  0950 - line number :goog:
+

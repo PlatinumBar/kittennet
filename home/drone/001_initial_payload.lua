@@ -15,6 +15,7 @@ local function cmp_lookup(name)
     return nil
   end
 end
+_G.cmp_lookup = cmp_lookup
 --#region remove
 
 ---@class computer
@@ -26,7 +27,7 @@ _G.component = _G.component
 
 --#endregion remove
 ---@class drone
-_G.self = cmp_lookup('drone') or cmp_lookup('robot')
+_G.self = cmp_lookup('drone') or cmp_lookup('robot') or cmp_lookup('tablet') or cmp_lookup('microcontroller')
 self.rname = self.name()
 self.setStatusText(self.rname)
 
@@ -46,7 +47,7 @@ modem.open(CMD_PORT)
 ---@type table<string,function>
 
 signal_callbacks = {}
----@type table<string,function>
+---@type table<string,fun(remote_addr:string, port:number, distance:number, stringinfo:string)>
 net_callbacks = {}
 
 ---@type table<string,table>
@@ -80,7 +81,7 @@ end
 ---@param data table
 signal_callbacks.modem_message = function(data)
   local _, _, remote_addr, port, distance, packet_type, stringinfo = table.unpack(data)
-  if net_callbacks[packet_type] ~= nil then
+  if net_callbacks[packet_type] then
     local ok, err = pcall(net_callbacks[packet_type], remote_addr, port, distance, stringinfo)
     if not ok then
       say('modem_callback_message error: ' .. err)
