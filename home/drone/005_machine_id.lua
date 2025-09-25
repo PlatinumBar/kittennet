@@ -150,6 +150,7 @@ function m:genSelfID()
   ---@cast modem modem
   local modem_addr = (modem and modem.address) or self.b2u('\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00')
   out[3] = self.u2b(modem_addr)
+  out[4] = string.pack('I', computer.totalMemory())
   return table.concat(out, '')
 end
 ---@param id string
@@ -161,8 +162,12 @@ function m:id2table(id)
   out.components = self:bytes2components(out.compArray)
   out.computer_id, off = self.b2u(unpack('c16', id, off))
   out.modem_id, off = self.b2u(unpack('c16', id, off))
+  out.total_mem, off = unpack('I', id, off)
   return out
 end
+---@param name string
+---@return boolean
+function m.hasComponent(name) return component.list(name, false) ~= {} end
 
 m.selfid = m:genSelfID()
 

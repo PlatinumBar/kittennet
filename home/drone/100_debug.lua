@@ -1,6 +1,8 @@
-function t2s(t, indent)
+function t2s(t, indent, seen)
   indent = indent or 0
   local lines = {}
+  local seen1 = seen or {}
+  if seen1[tostring(t)] then return 'repeated' end
   local pad = string.rep('  ', indent)
   table.insert(lines, '{')
   for k, v in pairs(t) do
@@ -87,3 +89,46 @@ function execution_handle()
   end
 end
 _G.mainfunc = execution_handle
+
+local function announce_modules()
+  for k, v in pairs(component.list()) do
+    say(string.format('mod %s -> %s', k, v))
+  end
+end
+
+say('var4')
+announce_modules()
+
+say('var2')
+fsay = function(str, ...)
+  local varargs = table.pack(...)
+  say(string.format(str, table.unpack(varargs)))
+end
+
+say('var1')
+
+local vec = require('003_veclib')
+local nav = component.proxy(component.list('navigation')())
+local polaris = require('008_polaris')
+
+say('going to the nearest waypoint')
+---@type { vec:vec3,redstone:number,address:string ,label:string}
+local closest = { vec = vec.new(0, 0, 300000000), label = 'default' }
+local ran = false
+local all_wp = vec.nodes_to_vec(nav.findWaypoints(100000))
+
+say('var3')
+---@cast nav navigation
+for label, point in pairs(all_wp) do
+  if point.vec:dist(vec.ORIGIN) < closest.vec:dist(vec.ORIGIN) then
+    closest = point
+    ran = true
+  end
+end
+
+-- if ran then
+--   fsay('moving to %s (label:%s)', t2s(closest), closest.label)
+--   polaris:move_relative_vec(closest.vec + vec.new(0, 1, 0))
+-- end
+if all_wp['charger'] then polaris:move_relative_vec(all_wp['charger'].vec + vec.new(0, 1, 0)) end
+return nil
