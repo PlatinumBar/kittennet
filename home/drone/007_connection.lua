@@ -6,10 +6,9 @@ s.seq = 1
 s.sessions = {} -- ongoing information transfer
 s.default_port = 5555
 s.personal_port = math.random(1000, 65000)
-s.modem.open(s.personal_port)
 ---@type table<{id:string,distance:number,pos:vec3}>
 s.neighbours = {}
-s.serializer = require('drone.006_bytearray')
+s.serializer = require('006_bytearray')
 
 ---@param target string # UUID
 ---@param port number

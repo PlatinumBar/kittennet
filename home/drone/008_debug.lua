@@ -1,38 +1,38 @@
----@type table<number,task>
-_G.tasks = {}
-_G.taskid = 10
----@param f thread
----@param type ?string
----@param val ?number
----@param default ?number
-local function newtask(f, type, val, default)
-  ---@type task
-  local t = {} ---@diagnostic disable-line
-  t.type = type or 'fn'
-  t.func = f
-  t.prio = val or 0
-  t.default = default or 0
-  return t
+function t2s(t, indent)
+  indent = indent or 0
+  local lines = {}
+  local pad = string.rep('  ', indent)
+  table.insert(lines, '{')
+  for k, v in pairs(t) do
+    local key = tostring(k)
+    if type(k) == 'number' then
+      key = '[' .. tostring(k) .. ']'
+    elseif type(k) == 'table' then
+      key = '"' .. t2s(key) .. '"'
+    end
+    local value
+    if type(v) == 'table' then
+      value = t2s(v, indent + 1)
+    elseif type(v) == 'string' then
+      value = string.format('%q', v)
+    else
+      value = tostring(v)
+    end
+    table.insert(lines, pad .. '  ' .. key .. ' = ' .. value .. ',')
+  end
+  table.insert(lines, pad .. '}')
+  return table.concat(lines, '\n')
 end
 
----@return task|nil
--- local function takeHighestPrio()
---   local hv = 0
---   local id = -1
---   if #tasks == 0 then return nil end
---   for i, v in ipairs(tasks) do
---     if v.p > hv then id = i end
---   end
---   t = tasks[id]
---   if not t.s then tasks[id].p = t.p - 1 end
---   return t
--- end
+say(string.format('used/total/left: {(%d)(%d)(%d)}', computer.totalMemory() - computer.freeMemory(), computer.totalMemory(), computer.freeMemory()))
 
-tasks[1] = newtask(
+local t = require('004_tasks')
+tasks[1] = t.newtask(
   coroutine.create(function()
     while true do
       local info = table.pack(computer.pullSignal(pullInterval)) -- this is a bad idea but i think it saves energy
       if info[1] and info ~= nil then
+        pullInterval = 0.01
         if signal_callbacks[info[1]] ~= nil then
           local c = coroutine.create(function()
             local ok, err = pcall(signal_callbacks[info[1]], info)
@@ -47,8 +47,11 @@ tasks[1] = newtask(
           --   tasks[taskid] = newtask(c, info[1], 1 --[[should have a higher priority so that its called before the new task creation i guess]], false)
           -- end
           coroutine.yield(true)
+        else
+          say('missing callback for ' .. tostring(info[1]))
         end
       else
+        pullInterval = 5
         -- do other tasks here i guess
         coroutine.yield(false) -- pretend like the pull didnt happen :C
       end
@@ -58,16 +61,13 @@ tasks[1] = newtask(
   0,
   0
 )
-tasks[2] = newtask(
-  coroutine.create(function()
-    while true do
-      clock = computer.uptime()
-      coroutine.yield()
-    end
-  end),
-  'clock'
-)
+t.newtask1(coroutine.create(function()
+  while true do
+    say(string.format('clock:%s', clock))
 
+    coroutine.yield()
+  end
+end))
 function execution_handle()
   for k, v in ipairs(tasks) do
     if v.prio <= 0 then
@@ -87,8 +87,3 @@ function execution_handle()
   end
 end
 _G.mainfunc = execution_handle
----@param i1 thread
----@param i2 ?string
----@param i3 ?number
----@param i4 ?number
-return { newtask = newtask, newtask1 = function(i1, i2, i3, i4) table.insert(tasks, newtask(i1, i2, i3, i4)) end }

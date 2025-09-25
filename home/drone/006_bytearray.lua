@@ -110,7 +110,7 @@ encoder.table = function(tbl)
     end
     return true
   end
-  local function count_table(t)
+  local function count(t)
     local count = 0
     for _ in pairs(t) do
       count = count + 1
@@ -120,18 +120,18 @@ encoder.table = function(tbl)
   local isarray = isArray(tbl)
 
   if isarray then
-    local s = sp('B', 0x16) .. safe_encode(#tbl) -- 0x16 .. size of the array .. (...elements...)
+    local s = sp('B', 0x16) .. se(#tbl) -- 0x16 .. size of the array .. (...elements...)
     for _, v in ipairs(tbl) do
-      s = s .. safe_encode(v)
+      s = s .. se(v)
     end
     return s
   else
     local s = sp('B', 0x15)
-    s = s .. safe_encode(count_table(tbl))
+    s = s .. se(count(tbl))
     for k, v in pairs(tbl) do
-      if type(k) ~= 'number' and type(k) ~= 'string' then error(1040129) end
-      s = s .. safe_encode(k)
-      s = s .. safe_encode(v)
+      if type(k) ~= 'number' and type(k) ~= 'string' then error(6) end
+      s = s .. se(k)
+      s = s .. se(v)
     end
     return s
   end
@@ -139,7 +139,7 @@ end
 
 ---@param value any
 ---@return string
-function safe_encode(value)
+function se(value)
   if encoder[type(value)] ~= nil then
     return encoder[type(value)](value)
   else
@@ -170,7 +170,7 @@ decoder[0x1] = function(str, offset) return true, offset end
 -- decoder[0x9] = function(str, offset) return up('j', str, offset) end
 -- decoder[0xa] = function(str, offset) return up('T', str, offset) end
 for i, v in ipairs({ 'B', 'H', 'L', 'J', 'b', 'h', 'l', 'j', 'T' }) do
-  decoder[i + 1] = load("return function(str,offset) up('" .. v .. "',str,offset) end")()
+  decoder[i + 1] = load('return function(str,offset) up(\'' .. v .. '\',str,offset) end')()
 end
 decoder[0xb] = function(str, offset)
   local bt = up('B', str, offset)
@@ -180,9 +180,13 @@ decoder[0xc] = function(str, offset)
   local bt = up('B', str, offset)
   return up('I' .. tostring(bt), str, offset + 1)
 end
-decoder[0xd] = function(str, offset) return up('f', str, offset) end
-decoder[0xf] = function(str, offset) return up('d', str, offset) end
-decoder[0x10] = function(str, offset) return up('n', str, offset) end
+-- decoder[0xd] = function(str, offset) return up('f', str, offset) end
+-- decoder[0xf] = function(str, offset) return up('d', str, offset) end
+-- decoder[0x10] = function(str, offset) return up('n', str, offset) end
+for i, v in ipairs({ 'f', 'd', 'n' }) do
+  decoder[i + 1] = load('return function(str,offset) up(\'' .. v .. '\',str,offset) end')()
+end
+
 decoder[0x11] = function(str, offset)
   local N, nof = up('B', str, offset)
   return up('c' .. tostring(N), str, nof)

@@ -1,4 +1,4 @@
-local CMD_PORT = 1234
+local CMD_PORT = 5555
 
 --- these have to exist because the bloat stripper will shit itself if you use the character
 -- ---@diagnostic disable-next-line:unused-local
@@ -93,7 +93,7 @@ end
 
 pullInterval = 1
 
-mainfunc = function()
+_G.mainfunc = function()
   local info = table.pack(computer.pullSignal(pullInterval)) -- this is a bad idea but i think it saves energy
   if info[1] and info ~= nil then
     if signal_callbacks[info[1]] ~= nil then
